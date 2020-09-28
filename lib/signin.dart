@@ -21,9 +21,10 @@ class _SignInState extends State<SignIn> {
   }
 
   final AuthService _auth = AuthService();
-
+  final _formKey = GlobalKey<FormState>();
   String email = " ";
   String password = " ";
+  String error = " ";
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -45,6 +46,7 @@ class _SignInState extends State<SignIn> {
                     child: Padding(
                       padding: const EdgeInsets.fromLTRB(25, 0.0, 25, 0),
                       child: Form(
+                        key: _formKey,
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: <Widget>[
@@ -133,6 +135,8 @@ class _SignInState extends State<SignIn> {
                             Padding(
                               padding: const EdgeInsets.fromLTRB(5, 1, 10, 10),
                               child: TextFormField(
+                                  validator: (val) =>
+                                      val.isEmpty ? "Email address" : null,
                                   decoration: new InputDecoration(
                                     contentPadding: EdgeInsets.symmetric(
                                       vertical: 0,
@@ -182,6 +186,9 @@ class _SignInState extends State<SignIn> {
                             Padding(
                               padding: const EdgeInsets.fromLTRB(5, 1, 10, 10),
                               child: TextFormField(
+                                  validator: (val) => val.length < 6
+                                      ? "Password must be greater than 6"
+                                      : null,
                                   obscureText: !_passwordVisible,
                                   decoration: new InputDecoration(
                                     suffixIcon: IconButton(
@@ -229,8 +236,16 @@ class _SignInState extends State<SignIn> {
                                 padding: EdgeInsets.fromLTRB(136, 10, 135, 10),
                                 splashColor: Color.fromRGBO(5, 135, 172, 1),
                                 onPressed: () async {
-                                  print(email);
-                                  print(password);
+                                  if (_formKey.currentState.validate()) {
+                                    dynamic result =
+                                        await _auth.signWithEmailAndPassword(
+                                            email, password);
+                                    //  print("Valid");
+                                    if (result == null) {
+                                      setState(
+                                          () => error = "could not sign in");
+                                    } else {}
+                                  }
                                 },
                                 child: Text(
                                   "Log in",
@@ -241,6 +256,8 @@ class _SignInState extends State<SignIn> {
                                 ),
                               ),
                             ),
+                            SizedBox(height: 12.0),
+                            Text(error, style: TextStyle(color: Colors.red)),
 
                             // Expanded(child: Divider()),
                             Padding(
